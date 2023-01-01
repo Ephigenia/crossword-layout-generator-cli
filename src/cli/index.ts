@@ -1,16 +1,22 @@
 import * as fs from 'node:fs';
 import { Argument, Command, Option } from 'commander';
 import { BIN_NAME } from './constants';
-import { csvToWordlist, jsonToWordlist, wordlistToCrossword } from '../lib';
+import { csvToWordlist, jsonToWordlist, wordlistToCrossword } from '../lib/helper';
 import { CrosswordsPdf } from '../lib/crosswordsPdf';
 import { Crossword } from '../lib/types';
 
 const program = new Command();
 
+interface ProgramOptions {
+  letters: string[],
+}
+
 program
-  .addOption(new Option(
-    '--letters [letters...]',
-    'specify the letters that should be shown',
+  .addOption((
+    new Option(
+      '--letters [letters...]',
+      'specify the letters that should be shown',
+    ).default([])
   ))
   .addArgument(new Argument('<inputFormat>', 'input file format'))
   .addArgument(new Argument('<outputFormat>', 'output file format'))
@@ -37,7 +43,7 @@ async function run(
   inputFileFormat: 'csv' | 'json' = 'csv',
   outputFileFormat: 'pdf' | 'txt' | 'json' = 'txt',
 ) {
-  const opts = program.opts();
+  const opts = program.opts<ProgramOptions>();
 
   // get input from stdin when available - if not throw an error
   if (process.stdin.isTTY) {
