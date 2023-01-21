@@ -15,6 +15,11 @@ class CrosswordsPdf {
 
   private doc: PDFKit.PDFDocument;
 
+  private solution = Array.from('HAPPY'.toUpperCase()).map((char, i) => ({
+    position: i + 1,
+    char: char,
+  }));
+
   constructor(
     private layout: CrosswordLayoutWrapper,
     private options: CrosswordsPdfOptions = {},
@@ -58,6 +63,7 @@ class CrosswordsPdf {
     // box background and stroke
     this.doc
       .rect(x, y, width, width)
+      .stroke([0,0,0])
       .fillAndStroke(backgroundColor, [0, 0, 0])
       .lineWidth(0.25)
       .stroke();
@@ -66,7 +72,6 @@ class CrosswordsPdf {
       .fontSize(width * 0.85)
       .fill([0, 0, 0])
       .text(char, x, y + (width * 0.20), { width, align: 'center' });
-
     return this;
   }
 
@@ -74,12 +79,27 @@ class CrosswordsPdf {
     x: number,
     y: number,
     width: number,
-    position: number
+    position: number | string,
+    color: ColorValue = [0,0,0],
   ): CrosswordsPdf {
     this.doc
       .fontSize(Math.round(width * 0.40))
-      .fillColor([0,0,0])
+      .fillColor(color)
       .text(String(position), x, y, { width });
+    return this;
+  }
+
+  private renderSolutionPosition(
+    x: number,
+    y: number,
+    width: number,
+    position: number | string,
+    color: ColorValue = [255,0,0],
+  ) {
+    this.doc
+      .fontSize(Math.round(width * 0.40))
+      .fillColor(color)
+      .text(String(position), x, y + width - width * 0.4, { width, align: 'right' });
     return this;
   }
 
@@ -109,12 +129,21 @@ class CrosswordsPdf {
       const offset = i * size;
       const letterX = x + (word.orientation == CROSSWORD_ORIENTATION.ACROSS ? offset : 0);
       const letterY = y + (word.orientation == CROSSWORD_ORIENTATION.DOWN ? offset : 0);
+      let displayedChar = char;
       // only show certain letters
       if (!(this.options.visibleLetters || []).includes(char)) {
-          char = '';
+        displayedChar = '';
       }
-      // render the first box with a different background color?
-      this.renderLetterBox(letterX, letterY, size, char);
+
+      const solutionCharIndex = this.solution.findIndex(s => s.char === char);
+      if (solutionCharIndex === -1) {
+        this.renderLetterBox(letterX, letterY, size, displayedChar);
+      } else {
+        const solutionChar = this.solution[solutionCharIndex];
+        this.solution.splice(solutionCharIndex, 1);
+        this.renderLetterBox(letterX, letterY, size, displayedChar, [240, 240, 240]);
+        this.renderSolutionPosition(letterX, letterY, size, solutionChar.position, [255,0,0]);
+      }
     });
 
     return this;
@@ -143,13 +172,27 @@ class CrosswordsPdf {
     // calculate the size of a single box for a word and use it to render
     // all the words in boxed
     const size = this.calculateBoxSize(width - padding * 2, height - padding * 2);
+
     this.layout.getWords().forEach(word => this.renderWord(word, size, x + padding, y + padding));
     this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x + padding, y + padding));
+
+
+    // render solution
+    const word = {
+      position: 0,
+      answer: this.solution.map(w => w.char).join(''),
+      clue: '',
+      startx: 0,
+      starty: 0,
+      orientation: CROSSWORD_ORIENTATION.ACROSS,
+    };
+    this.renderWord(word, size, x + padding, y + padding);
+
     return this;
   }
 
   private render() {
-    const wordlistWidth = 170;
+    const wordlistWidth = 200;
     this.renderWords(wordlistWidth, 10, this.doc.page.width - wordlistWidth - 10, this.doc.page.height - 20, 10);
     this.renderClues(10, 10, wordlistWidth - 20);
     return this;
