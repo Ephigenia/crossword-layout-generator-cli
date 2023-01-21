@@ -63,10 +63,9 @@ class CrosswordsPdf {
     // box background and stroke
     this.doc
       .rect(x, y, width, width)
-      .stroke([0, 0, 0])
-      // .fillAndStroke(backgroundColor, [0, 0, 0])
       .lineWidth(0.25)
-      .stroke();
+      .stroke([0, 0, 0]);
+      // .fillAndStroke(backgroundColor, [0, 0, 0])
 
     // draw the letter
     if (char) {
@@ -145,7 +144,7 @@ class CrosswordsPdf {
       }
 
       const solutionCharIndex = this.solution.findIndex(s => s.char === char);
-      if (solutionCharIndex === -1 || solutionShown) {
+      if (solutionCharIndex === -1 || solutionShown && i > 0) {
         this.renderLetterBox(letterX, letterY, size, displayedChar);
       } else {
         const solutionChar = this.solution[solutionCharIndex];
@@ -179,31 +178,20 @@ class CrosswordsPdf {
     //   .rect(x, y, width, height)
     //   .fill([250, 250, 250]);
 
-    const solution = this.solution;; //.map(w => w.char).join('');
+    const solution = [ ...this.solution ];
 
     // calculate the size of a single box for a word and use it to render
     // all the words in boxed
     const size = this.calculateBoxSize(width - padding * 2, height - padding * 2);
-    console.log(this.solution);
     this.layout.getWords().forEach(word => this.renderWord(word, size, x + padding, y + padding));
     this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x + padding, y + padding));
 
-    // render solution
-    // const word = {
-    //   position: 0,
-    //   answer: solutionString,
-    //   clue: '',
-    //   startx: 0,
-    //   starty: 0,
-    //   orientation: CROSSWORD_ORIENTATION.ACROSS,
-    // };
+    // render the solution
     solution.forEach(w => {
-      const xx = x + w.position * size;
-
-      this.renderLetterBox(xx, y, size, '');
-      this.renderSolutionPosition(xx, y, size, w.position);
+      const xx = x + (w.position) * size;
+      this.renderLetterBox(xx, y + 10, size, '', [255, 255, 255]);
+      this.renderPosition(xx + 1, y + 10 + 0.5, size, w.position, [255, 0, 0]);
     });
-    // this.renderWord(word, size, x + padding, y + padding);
 
     return this;
   }
