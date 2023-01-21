@@ -33,10 +33,10 @@ class CrosswordsPdf {
     const accross = this.layout.getWords(CROSSWORD_ORIENTATION.ACROSS).sort((a, b) => a.position - b.position);
     const down = this.layout.getWords(CROSSWORD_ORIENTATION.DOWN).sort((a, b) => a.position - b.position);
     const text = [
-      'Horizontal:',
+      'horizontal:',
       ...accross.map(word => `${word.position}. ${word.clue}`),
       '',
-      'Vertical:',
+      'vertical:',
       ...down.map(word => `${word.position}. ${word.clue}`),
     ].join('\n');
 
@@ -74,9 +74,21 @@ class CrosswordsPdf {
     position: number
   ): CrosswordsPdf {
     this.doc
-      .fontSize(Math.round(width * 0.25))
+      .fontSize(Math.round(width * 0.35))
       .fillColor([0,0,0])
       .text(String(position), x, y, { width });
+    return this;
+  }
+
+  private renderWordPosition(
+    word: Crossword,
+    size = 12,
+    x = 0,
+    y = 0,
+  ): CrosswordsPdf {
+    x += (word.startx - 1) * size;
+    y += (word.starty - 1) * size;
+    this.renderPosition(x + 0.5, y + 0.5, size, word.position);
     return this;
   }
 
@@ -100,8 +112,6 @@ class CrosswordsPdf {
       }
       this.renderLetterBox(letterX, letterY, size, char);
     });
-
-    this.renderPosition(x + 0.5, y + 0.5, size, word.position);
 
     return this;
   }
@@ -136,6 +146,7 @@ class CrosswordsPdf {
     // all the words in boxed
     const size = this.calculateBoxSize(width - padding * 2, height - padding * 2);
     this.layout.getWords().forEach(word => this.renderWord(word, size, x + padding, y + padding));
+    this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x + padding, y + padding));
     return this;
   }
 
