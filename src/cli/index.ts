@@ -27,6 +27,8 @@ Examples:
     show only certain letters
       ${BIN_NAME} json pdf --letters A E I O U
 
+    // TODO mark general solution words
+
     ${BIN_NAME} json pdf
 
     ${BIN_NAME} csv txt

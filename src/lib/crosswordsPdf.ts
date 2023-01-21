@@ -115,17 +115,17 @@ class CrosswordsPdf {
   }
 
   private renderWords(
-    x: number = 0,
-    y: number = 0,
+    x = 0,
+    y = 0,
     width: number,
     height: number,
-    padding: number = 10,
+    padding = 10,
   ): CrosswordsPdf {
     // calculate the area reserved for the crossword boxes
-    const boxCanvasSize = [
-      this.doc.page.width - 170 - 10,
-      this.doc.page.height - 10,
-    ]
+    // const boxCanvasSize = [
+    //   this.doc.page.width - 170 - 10,
+    //   this.doc.page.height - 10,
+    // ]
 
     // draw background of boxes canvas size
     this.doc
