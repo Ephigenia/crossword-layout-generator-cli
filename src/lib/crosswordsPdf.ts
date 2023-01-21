@@ -15,7 +15,7 @@ class CrosswordsPdf {
 
   private doc: PDFKit.PDFDocument;
 
-  private solution = Array.from('HAPPY'.toUpperCase()).map((char, i) => ({
+  private solution = Array.from('HAPPYBIRTHDAY'.toUpperCase()).map((char, i) => ({
     position: i + 1,
     char: char,
   }));
@@ -148,7 +148,7 @@ class CrosswordsPdf {
         const solutionChar = this.solution[solutionCharIndex];
         this.solution.splice(solutionCharIndex, 1);
         this.renderLetterBox(letterX, letterY, size, displayedChar);
-        this.renderSolutionPosition(letterX, letterY, size, solutionChar.position, [255,0,0]);
+        this.renderSolutionPosition(letterX, letterY, size, solutionChar.position, [255, 0, 0]);
       }
     });
 
@@ -173,20 +173,21 @@ class CrosswordsPdf {
     // draw background of boxes canvas size
     this.doc
       .rect(x, y, width, height)
-      .fill([250, 250, 250])
+      .fill([250, 250, 250]);
+
+    const solutionString = this.solution.map(w => w.char).join('');
 
     // calculate the size of a single box for a word and use it to render
     // all the words in boxed
     const size = this.calculateBoxSize(width - padding * 2, height - padding * 2);
-
+    console.log(this.solution);
     this.layout.getWords().forEach(word => this.renderWord(word, size, x + padding, y + padding));
     this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x + padding, y + padding));
-
 
     // render solution
     const word = {
       position: 0,
-      answer: this.solution.map(w => w.char).join(''),
+      answer: solutionString,
       clue: '',
       startx: 0,
       starty: 0,
