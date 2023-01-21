@@ -9,6 +9,8 @@ interface CrosswordsPdfOptions {
   visibleLetters?: string[],
 }
 
+type ColorValue = string | [number, number, number] | [number, number, number, number];
+
 class CrosswordsPdf {
 
   private doc: PDFKit.PDFDocument;
@@ -50,12 +52,13 @@ class CrosswordsPdf {
     x: number,
     y: number,
     width: number,
-    char: string
+    char: string,
+    backgroundColor: ColorValue = [255, 255, 255],
   ): CrosswordsPdf {
     // box background and stroke
     this.doc
       .rect(x, y, width, width)
-      .fillAndStroke([255,255,255], [0, 0, 0])
+      .fillAndStroke(backgroundColor, [0, 0, 0])
       .lineWidth(0.25)
       .stroke();
 
@@ -74,7 +77,7 @@ class CrosswordsPdf {
     position: number
   ): CrosswordsPdf {
     this.doc
-      .fontSize(Math.round(width * 0.35))
+      .fontSize(Math.round(width * 0.40))
       .fillColor([0,0,0])
       .text(String(position), x, y, { width });
     return this;
@@ -110,6 +113,7 @@ class CrosswordsPdf {
       if (!(this.options.visibleLetters || []).includes(char)) {
           char = '';
       }
+      // render the first box with a different background color?
       this.renderLetterBox(letterX, letterY, size, char);
     });
 
@@ -131,16 +135,10 @@ class CrosswordsPdf {
     height: number,
     padding = 10,
   ): CrosswordsPdf {
-    // calculate the area reserved for the crossword boxes
-    // const boxCanvasSize = [
-    //   this.doc.page.width - 170 - 10,
-    //   this.doc.page.height - 10,
-    // ]
-
     // draw background of boxes canvas size
     this.doc
       .rect(x, y, width, height)
-      .fill([240, 240, 240])
+      .fill([250, 250, 250])
 
     // calculate the size of a single box for a word and use it to render
     // all the words in boxed
@@ -151,8 +149,9 @@ class CrosswordsPdf {
   }
 
   private render() {
-    this.renderWords(170, 10, this.doc.page.width - 170 - 10, this.doc.page.height - 20, 10);
-    this.renderClues(10, 10, 150);
+    const wordlistWidth = 250;
+    this.renderWords(wordlistWidth, 10, this.doc.page.width - wordlistWidth - 10, this.doc.page.height - 20, 10);
+    this.renderClues(10, 10, wordlistWidth - 20);
     return this;
   }
 
