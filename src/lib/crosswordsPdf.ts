@@ -149,7 +149,7 @@ class CrosswordsPdf {
   }
 
   private render() {
-    const wordlistWidth = 250;
+    const wordlistWidth = 170;
     this.renderWords(wordlistWidth, 10, this.doc.page.width - wordlistWidth - 10, this.doc.page.height - 20, 10);
     this.renderClues(10, 10, wordlistWidth - 20);
     return this;
