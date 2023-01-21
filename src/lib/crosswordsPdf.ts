@@ -57,21 +57,23 @@ class CrosswordsPdf {
     x: number,
     y: number,
     width: number,
-    char: string,
+    char = '',
     backgroundColor: ColorValue = [255, 255, 255],
   ): CrosswordsPdf {
     // box background and stroke
     this.doc
       .rect(x, y, width, width)
-      .stroke([0,0,0])
       .fillAndStroke(backgroundColor, [0, 0, 0])
       .lineWidth(0.25)
       .stroke();
 
-    this.doc
-      .fontSize(width * 0.85)
-      .fill([0, 0, 0])
-      .text(char, x, y + (width * 0.20), { width, align: 'center' });
+    // draw the letter
+    if (char) {
+      this.doc
+        .fontSize(width * 0.85)
+        .fill([0, 0, 0])
+        .text(char, x, y + (width * 0.20), { width, align: 'center' });
+    }
     return this;
   }
 
@@ -97,12 +99,13 @@ class CrosswordsPdf {
     color: ColorValue = [255,0,0],
   ) {
     this.doc
-      .stroke(color)
-      .circle(x + width/2, y + width/2, width)
+      .circle(x + width / 2, y + width / 2, width / 2.1)
+      .stroke(color);
+    const fontSize = width * 0.4;
     this.doc
-      .fontSize(Math.round(width * 0.40))
+      .fontSize(Math.round(fontSize))
       .fillColor(color)
-      .text(String(position), x, y + width - width * 0.4, { width, align: 'right' });
+      .text(String(position), x, y + width - fontSize, { width: width - 1, align: 'right' });
     return this;
   }
 
@@ -144,7 +147,7 @@ class CrosswordsPdf {
       } else {
         const solutionChar = this.solution[solutionCharIndex];
         this.solution.splice(solutionCharIndex, 1);
-        this.renderLetterBox(letterX, letterY, size, displayedChar, [240, 240, 240]);
+        this.renderLetterBox(letterX, letterY, size, displayedChar);
         this.renderSolutionPosition(letterX, letterY, size, solutionChar.position, [255,0,0]);
       }
     });
