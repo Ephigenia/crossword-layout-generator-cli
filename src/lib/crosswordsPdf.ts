@@ -72,7 +72,7 @@ class CrosswordsPdf {
     y: number,
     width: number,
     position: number
-  ): CrosswordsPdf  {
+  ): CrosswordsPdf {
     this.doc
       .fontSize(Math.round(width * 0.25))
       .fillColor([0,0,0])
@@ -91,9 +91,9 @@ class CrosswordsPdf {
 
     const chars = Array.from(word.answer.toUpperCase());
     chars.forEach((char, i) => {
-      let offset = i * size;
-      let letterX = x + (word.orientation == CROSSWORD_ORIENTATION.ACROSS ? offset : 0);
-      let letterY = y + (word.orientation == CROSSWORD_ORIENTATION.DOWN ? offset : 0);
+      const offset = i * size;
+      const letterX = x + (word.orientation == CROSSWORD_ORIENTATION.ACROSS ? offset : 0);
+      const letterY = y + (word.orientation == CROSSWORD_ORIENTATION.DOWN ? offset : 0);
       // only show certain letters
       if (!(this.options.visibleLetters || []).includes(char)) {
           char = '';
