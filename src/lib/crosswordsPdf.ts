@@ -179,7 +179,7 @@ class CrosswordsPdf {
     //   .rect(x, y, width, height)
     //   .fill([250, 250, 250]);
 
-    const solutionString = this.solution.map(w => w.char).join('');
+    const solution = this.solution;; //.map(w => w.char).join('');
 
     // calculate the size of a single box for a word and use it to render
     // all the words in boxed
@@ -189,15 +189,21 @@ class CrosswordsPdf {
     this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x + padding, y + padding));
 
     // render solution
-    const word = {
-      position: 0,
-      answer: solutionString,
-      clue: '',
-      startx: 0,
-      starty: 0,
-      orientation: CROSSWORD_ORIENTATION.ACROSS,
-    };
-    this.renderWord(word, size, x + padding, y + padding);
+    // const word = {
+    //   position: 0,
+    //   answer: solutionString,
+    //   clue: '',
+    //   startx: 0,
+    //   starty: 0,
+    //   orientation: CROSSWORD_ORIENTATION.ACROSS,
+    // };
+    solution.forEach(w => {
+      const xx = x + w.position * size;
+
+      this.renderLetterBox(xx, y, size, '');
+      this.renderSolutionPosition(xx, y, size, w.position);
+    });
+    // this.renderWord(word, size, x + padding, y + padding);
 
     return this;
   }
