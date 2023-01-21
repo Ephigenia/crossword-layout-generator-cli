@@ -63,7 +63,8 @@ class CrosswordsPdf {
     // box background and stroke
     this.doc
       .rect(x, y, width, width)
-      .fillAndStroke(backgroundColor, [0, 0, 0])
+      .stroke([0, 0, 0])
+      // .fillAndStroke(backgroundColor, [0, 0, 0])
       .lineWidth(0.25)
       .stroke();
 
@@ -130,6 +131,8 @@ class CrosswordsPdf {
     x += (word.startx - 1) * size;
     y += (word.starty - 1) * size;
 
+    let solutionShown = false;
+
     const chars = Array.from(word.answer.toUpperCase());
     chars.forEach((char, i) => {
       const offset = i * size;
@@ -142,13 +145,14 @@ class CrosswordsPdf {
       }
 
       const solutionCharIndex = this.solution.findIndex(s => s.char === char);
-      if (solutionCharIndex === -1) {
+      if (solutionCharIndex === -1 || solutionShown) {
         this.renderLetterBox(letterX, letterY, size, displayedChar);
       } else {
         const solutionChar = this.solution[solutionCharIndex];
         this.solution.splice(solutionCharIndex, 1);
         this.renderLetterBox(letterX, letterY, size, displayedChar);
         this.renderSolutionPosition(letterX, letterY, size, solutionChar.position, [255, 0, 0]);
+        solutionShown = true;
       }
     });
 
@@ -171,9 +175,9 @@ class CrosswordsPdf {
     padding = 10,
   ): CrosswordsPdf {
     // draw background of boxes canvas size
-    this.doc
-      .rect(x, y, width, height)
-      .fill([250, 250, 250]);
+    // this.doc
+    //   .rect(x, y, width, height)
+    //   .fill([250, 250, 250]);
 
     const solutionString = this.solution.map(w => w.char).join('');
 
