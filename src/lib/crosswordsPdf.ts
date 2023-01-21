@@ -97,6 +97,9 @@ class CrosswordsPdf {
     color: ColorValue = [255,0,0],
   ) {
     this.doc
+      .stroke(color)
+      .circle(x + width/2, y + width/2, width)
+    this.doc
       .fontSize(Math.round(width * 0.40))
       .fillColor(color)
       .text(String(position), x, y + width - width * 0.4, { width, align: 'right' });
