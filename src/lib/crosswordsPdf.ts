@@ -27,7 +27,7 @@ class CrosswordsPdf {
     this.doc = new PDFDocument({
       size: 'A4',
       layout: 'landscape',
-      margins: { top: 0, left: 0, right: 0, bottom: 0 },
+      margins: { top: 15, left: 15, right: 15, bottom: 15 },
     });
     this.doc.font('Helvetica');
   }
@@ -48,8 +48,8 @@ class CrosswordsPdf {
     ].join('\n');
 
     this.doc
-      .fontSize(6)
-      .fill([0,0,0])
+      .fontSize(5.9)
+      .fill([0, 0, 0])
       .text(text, x, y, { width });
   }
 
@@ -57,15 +57,13 @@ class CrosswordsPdf {
     x: number,
     y: number,
     width: number,
-    char = '',
-    backgroundColor: ColorValue = [255, 255, 255],
+    char = ''
   ): CrosswordsPdf {
-    // box background and stroke
+    // box
     this.doc
       .rect(x, y, width, width)
       .lineWidth(0.25)
       .stroke([0, 0, 0]);
-      // .fillAndStroke(backgroundColor, [0, 0, 0])
 
     // draw the letter
     if (char) {
@@ -82,10 +80,11 @@ class CrosswordsPdf {
     y: number,
     width: number,
     position: number | string,
-    color: ColorValue = [0,0,0],
+    color: ColorValue = [0, 0, 0],
   ): CrosswordsPdf {
+    const fontSize = width * 0.45;
     this.doc
-      .fontSize(Math.round(width * 0.40))
+      .fontSize(fontSize)
       .fillColor(color)
       .text(String(position), x, y, { width });
     return this;
@@ -96,14 +95,14 @@ class CrosswordsPdf {
     y: number,
     width: number,
     position: number | string,
-    color: ColorValue = [255,0,0],
+    color: ColorValue = [255, 0, 0],
   ) {
     this.doc
       .circle(x + width / 2, y + width / 2, width / 2.1)
       .stroke(color);
-    const fontSize = width * 0.4;
+    const fontSize = width * 0.45;
     this.doc
-      .fontSize(Math.round(fontSize))
+      .fontSize(fontSize)
       .fillColor(color)
       .text(String(position), x, y + width - fontSize, { width: width - 1, align: 'right' });
     return this;
@@ -123,18 +122,18 @@ class CrosswordsPdf {
 
   private renderWord(
     word: Crossword,
-    size = 12,
+    boxSize = 12,
     x = 0,
     y = 0,
   ): CrosswordsPdf {
-    x += (word.startx - 1) * size;
-    y += (word.starty - 1) * size;
+    x += (word.startx - 1) * boxSize;
+    y += (word.starty - 1) * boxSize;
 
     let solutionShown = false;
 
     const chars = Array.from(word.answer.toUpperCase());
     chars.forEach((char, i) => {
-      const offset = i * size;
+      const offset = i * boxSize;
       const letterX = x + (word.orientation == CROSSWORD_ORIENTATION.ACROSS ? offset : 0);
       const letterY = y + (word.orientation == CROSSWORD_ORIENTATION.DOWN ? offset : 0);
       let displayedChar = char;
@@ -145,12 +144,12 @@ class CrosswordsPdf {
 
       const solutionCharIndex = this.solution.findIndex(s => s.char === char);
       if (solutionCharIndex === -1 || solutionShown && i > 0) {
-        this.renderLetterBox(letterX, letterY, size, displayedChar);
+        this.renderLetterBox(letterX, letterY, boxSize, displayedChar);
       } else {
         const solutionChar = this.solution[solutionCharIndex];
         this.solution.splice(solutionCharIndex, 1);
-        this.renderLetterBox(letterX, letterY, size, displayedChar);
-        this.renderSolutionPosition(letterX, letterY, size, solutionChar.position, [255, 0, 0]);
+        this.renderLetterBox(letterX, letterY, boxSize, displayedChar);
+        this.renderSolutionPosition(letterX, letterY, boxSize, solutionChar.position, [255, 0, 0]);
         solutionShown = true;
       }
     });
@@ -171,34 +170,36 @@ class CrosswordsPdf {
     y = 0,
     width: number,
     height: number,
-    padding = 10,
   ): CrosswordsPdf {
-    // draw background of boxes canvas size
-    // this.doc
-    //   .rect(x, y, width, height)
-    //   .fill([250, 250, 250]);
-
     const solution = [ ...this.solution ];
 
     // calculate the size of a single box for a word and use it to render
     // all the words in boxed
-    const size = this.calculateBoxSize(width - padding * 2, height - padding * 2);
-    this.layout.getWords().forEach(word => this.renderWord(word, size, x + padding, y + padding));
-    this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x + padding, y + padding));
+    const size = this.calculateBoxSize(width, height);
+    this.layout.getWords().forEach(word => this.renderWord(word, size, x, y));
+    this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x, y));
 
     // render the solution
     solution.forEach(w => {
-      const xx = x + (w.position) * size;
-      this.renderLetterBox(xx, y + 10, size, '', [255, 255, 255]);
-      this.renderPosition(xx + 1, y + 10 + 0.5, size, w.position, [255, 0, 0]);
+      const xx = x + (w.position - 1) * size;
+      this.renderLetterBox(xx, y, size, '');
+      this.renderPosition(xx + 1, y + 0.5, size, w.position, [255, 0, 0]);
+      this.doc
+        .lineWidth(1)
+        .moveTo(xx, y + size)
+        .lineTo(xx + size, y + size)
+        .stroke([0, 0, 0]);
     });
+    this.doc
+      .fill([0, 0, 0])
+      .text('Lösungswort', x, y - 8);
 
     return this;
   }
 
   private render() {
-    const wordlistWidth = 200;
-    this.renderWords(wordlistWidth, 10, this.doc.page.width - wordlistWidth - 10, this.doc.page.height - 20, 10);
+    const wordlistWidth = 170;
+    this.renderWords(wordlistWidth, 10, this.doc.page.width - wordlistWidth - 10, this.doc.page.height - 20);
     this.renderClues(10, 10, wordlistWidth - 20);
     return this;
   }
