@@ -9,6 +9,7 @@ const program = new Command();
 
 interface ProgramOptions {
   letters: string[],
+  solution: string,
 }
 
 program
@@ -17,6 +18,12 @@ program
       '--letters [letters...]',
       'specify the letters that should be shown',
     ).default([])
+  ))
+  .addOption((
+    new Option(
+      '--solution <solution>',
+      'for PDF output only, specify an optional solution that would be marked through the crossword, note that all letters from the solution should be part of the crossword answers.',
+    ).default('')
   ))
   .addArgument(new Argument('<inputFormat>', 'input file format'))
   .addArgument(new Argument('<outputFormat>', 'output file format'))
@@ -27,7 +34,8 @@ Examples:
     show only certain letters
       ${BIN_NAME} json pdf --letters A E I O U
 
-    // TODO mark general solution words
+    use the following word as solution for the crossword
+      ${BIN_NAME} json pdf --solution Hello
 
     ${BIN_NAME} json pdf
 
@@ -73,6 +81,7 @@ async function run(
     case 'pdf':
       const pdf = new CrosswordsPdf(layout, {
         visibleLetters: opts.letters,
+        solution: opts.solution,
       });
       const binary = await pdf.getContent();
       process.stdout.write(binary);

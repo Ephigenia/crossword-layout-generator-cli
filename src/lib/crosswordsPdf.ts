@@ -7,6 +7,7 @@ import { CrosswordLayoutWrapper } from './crosswordLayoutWrapper';
 interface CrosswordsPdfOptions {
   document?: PDFKit.PDFDocumentOptions,
   visibleLetters?: string[],
+  solution?: string,
 }
 
 type ColorValue = string | [number, number, number] | [number, number, number, number];
@@ -15,10 +16,7 @@ class CrosswordsPdf {
 
   private doc: PDFKit.PDFDocument;
 
-  private solution = Array.from('HAPPYBIRTHDAY'.toUpperCase()).map((char, i) => ({
-    position: i + 1,
-    char: char,
-  }));
+  private solution: { position: number, char: string }[] = [];
 
   constructor(
     private layout: CrosswordLayoutWrapper,
@@ -30,6 +28,12 @@ class CrosswordsPdf {
       margins: { top: 15, left: 15, right: 15, bottom: 15 },
     });
     this.doc.font('Helvetica');
+    if (options.solution) {
+      this.solution = Array.from(options.solution.toUpperCase()).map((char, i) => ({
+        position: i + 1,
+        char: char,
+      }));
+    }
   }
 
   private renderClues(
@@ -201,6 +205,11 @@ class CrosswordsPdf {
     const wordlistWidth = 170;
     this.renderWords(wordlistWidth, 10, this.doc.page.width - wordlistWidth - 10, this.doc.page.height - 20);
     this.renderClues(10, 10, wordlistWidth - 20);
+    // check if solution is empty, if not show an error that not all letters
+    // from the solution could be used
+    if (this.solution.length > 0) {
+      throw new Error(`The letters from the solution where not able to be marked in all the crosswords answers.`);
+    }
     return this;
   }
 
