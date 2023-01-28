@@ -183,6 +183,11 @@ class CrosswordsPdf {
     this.layout.getWords().forEach(word => this.renderWord(word, size, x, y));
     this.layout.getWords().forEach(word => this.renderWordPosition(word, size, x, y));
 
+    this.renderSolution(solution, x, this.doc.page.height - 40, size);
+    return this;
+  }
+
+  private renderSolution(solution, x: number, y: number, size: number) {
     // render the solution
     solution.forEach(w => {
       const xx = x + (w.position - 1) * size;
@@ -197,8 +202,6 @@ class CrosswordsPdf {
     this.doc
       .fill([0, 0, 0])
       .text('Lösungswort', x, y - 8);
-
-    return this;
   }
 
   private render() {
